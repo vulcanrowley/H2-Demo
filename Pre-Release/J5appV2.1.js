@@ -55,7 +55,7 @@ app.get('/', function(req, res, next) {
 
 //board = new five.Board();
 var board = new five.Board({
-  port: "COM9",
+  port: "COM9", // WARNING __ MUST SET ARDUINO PORT MANUALLY
   repl: false  
 });
 board.on("ready", function() {

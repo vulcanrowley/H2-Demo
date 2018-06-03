@@ -46,7 +46,7 @@ app.get('/', function(req, res, next) {
 
 //board = new five.Board();
 var board = new five.Board({
-  port: "COM9",
+  //port: "COM9",
   repl: false  
 });
 board.on("ready", function() {
