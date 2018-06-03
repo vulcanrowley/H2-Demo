@@ -1,0 +1,346 @@
+<!doctype html>
+
+<html lang=en>
+<head>
+          <title>HydroAlumina Demo</title>
+   <link rel="stylesheet" href="/style.css">  
+
+ <link type="text/css" rel="stylesheet" href="rickshaw.css">
+    <!--  style sheet for gauge  -->
+    <style>
+    .wrapper {
+      position: relative;
+      width: 640px;
+      height: 480px;
+      margin: 50px auto 0 auto;
+      padding-bottom: 30px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      clear: both;
+    }
+
+    .box {
+      float: left;
+      width: 100%;
+      height: 70%;
+      box-sizing: border-box;
+        padding: 16px 40px;
+    }
+
+
+
+    .gauge {
+      width: 150px;
+      height: 100px;
+    }
+/*
+    button {
+      margin: 30px 5px 0 2px;
+      padding: 16px 40px;
+      border-radius: 5px;
+      font-size: 18px;
+      border: none;
+      background: #34aadc;
+      color: white;
+      cursor: pointer;
+    }
+*/
+    </style>
+    
+    <!-- load scripts  -->
+    
+<script src="./vendor/d3.v3.js"></script>
+
+<script src="rickshaw.js"></script>
+        <script src="raphael-2.1.4.min.js"></script>
+    <script src="justgage.js"></script>  
+ 
+</head>
+<body>
+
+<h1 style="text-align:center;">Hydrogen Generator Demo</h1><br><br>
+
+ <div class="container">
+    <!--  assign pins to sensors and actuators  -->
+    <div class='config left'> 
+    <h2>Configurations</h2>
+
+         
+<form>
+<datalist id="defaultNumbers">
+  <option value=3>
+  <option value=5>
+  <option value=6>
+  <option value=9>
+  <option value=10>
+  <option value=11>   
+</datalist> 
+    <h4>Actuators</h4><br>
+    <hr>
+        GA Motor Pin:
+        
+        <input id="gaPin" type="number" list="defaultNumbers"  min="0" max="99">
+    
+         IN Motor Pin:
+        <input id="inPin" type="number" list="defaultNumbers"  min="0" max="99">
+    
+    OUT Motor Pin:
+    <input id="outPin" type="number" list="defaultNumbers" min="0" max="99" >
+    
+           Reclaim Motor:
+    <input id="recPin" type="number" list="defaultNumbers" min="0" max="99" >  
+    
+    <br>  
+    
+        Reclaim Solenoid:
+        
+        <input id="s1Pin" type="number"  value="12", min="0" max="99">
+      
+  
+    <br><br>    <h4>Sensors</h4><br>
+    
+    
+    <hr>
+   <datalist id="sensorPins">
+  <option value=2>
+  <option value=3>
+  <option value=4>
+  <option value=6>
+  <option value=11>   
+</datalist> 
+    
+       H2O-Sensor Pin:
+   <input id="wsPin" type="number"  list="sensorPins" min="0" max="99" >
+   
+    
+           GA-Height Pin:
+   <input id="tofPin" type="number"  list="sensorPins" min="0" max="99" >
+ 
+               Temperature Pin:
+   <input id="tempPin" type="number"  list="sensorPins" min="0" max="99" >
+    
+</form>
+    <br><br>    
+    <p id="debug">debug</p>     
+        
+     </div>   
+     <!--  contains water motors and Ga pump     -->
+    <div class="GaOps left"> 
+        <h2>Reactor Control</h2>
+        
+    <br><br>
+    <!--  TRIGGER button   -->
+    <button type="button" id='tr'>Trigger</button>
+    <br><br>  
+      
+        
+        <h3>Ga Inject Time:</h3>
+    <input class="left" id="gaTime" type="range" min="0" max="10" step=".1" value="0">
+        
+    <input id="gaAmt" type="number"  value="0", min="0" max="99">  seconds  
+  
+<br><br> <br><br><hr><h4> Water Motor Controls </h4><br>
+     
+        <h3>Water IN %</h3>
+    <input class="left" id="INTime" type="range" min="0" max="100" step="1" value="0">
+        
+    <div class="left" id="inAmt" style="padding-left: 15px; padding-right: 15px;">0</div>%
+       
+        <div class='clear'></div>
+      
+        <h3>Water OUT %</h3>
+    <input class="left" id="OUT" type="range" min="0" max="100" step="1" value="0">
+        
+    <p class="left" id="outAmt" style="padding-left: 15px; padding-right: 15px;">0</p>%
+        
+        <div class='clear'></div>
+  <br><br> 
+
+             <!--  water level LED  -->
+<div style="padding-left: 25px;"><span id ="wsLED" class="dot"><span class="dot-inner"></span></span> </div>
+        
+<p>High Water Level</p>
+        
+     
+     
+        
+    </div>
+
+
+       
+     <!--  manage sensors and motors to recover and refresh GA   -->
+    <div class="reprocess left"> 
+     <h2>Reprocessing</h2> 
+        
+  
+        
+        <br><br>
+       <!--  Reclaim Solenoid button   -->
+    <button type="button" id='rs'>Open Reclaim Valve</button>
+    <br><br>  
+        
+        <h3>Reclaim Valve Open Time:</h3>
+    <input class="left" id="rsTime" type="range" min="0" max="10" step=".1" value="0">
+        
+    <input id="rsAmt" type="number"  value="0", min="0" max="99">seconds      
+        
+         <br><br><hr><br>
+
+             
+   <div><span id ="grbLED" class="dot"><span class="dot-inner"></span></span> </div>
+        
+        <p>Ga Present</p>
+    <!-- 
+    <label class="switch">
+  <input type="checkbox"  id="GRBenable" >
+  <span class="slider"></span>
+</label> 
+  
+    -->   
+    
+        
+        
+        <p>Note: When "Ga Present" is lit, water motors are off and Ga Recovery motor starts automatically </p>
+        <br><hr>
+        
+       <b>H2 Gas Temperature</b> <p id="GART">?</p>
+ 
+        
+      <div id="g1" class="gauge"></div>
+   <!--
+      <div class="box">
+        <div id="g1" class="gauge"></div>
+      </div>
+     -->   
+       <div class='clear'></div> 
+    </div>
+        
+         <!-- manage temp, pressure and flow displays and chart  -->
+ <div class="graphing left" id="content" >  
+<h3>MFC Hydrogen Flow (grams/minute)</h3>
+     <br><br>
+ <div class="box">
+	<div id="chart"></div>
+  </div>  
+     <hr><br><br>
+     <b>Total Hydrogen</b>
+     <div id='totalH2'>totalH2</div>
+     
+</div>
+   
+    <div class='clear'></div>
+</div>   
+    
+<!--  gauge js  -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+
+      var g1 = new JustGage({
+        id: 'g1',
+        value: 65,
+        min: 0,
+        max: 100,
+        symbol: '°',
+        pointer: true,
+        gaugeWidthScale: 0.6,
+        customSectors: [{
+          color: '#ff0000',
+          lo: 50,
+          hi: 100
+        }, {
+          color: '#00ff00',
+          lo: 0,
+          hi: 50
+        }],
+        counter: true
+      });
+
+
+
+      document.getElementById('gauge_refresh').addEventListener('click', function() {
+        g1.refresh(getRandomInt(0, 100));
+
+      });
+    });
+    </script>  
+
+<!  Rickshaw graphing -->
+<script>
+var mfmData = 0;
+var tv = 100;
+
+// instantiate our graph!
+var graph = new Rickshaw.Graph( {
+	element: document.getElementById("chart"),
+	width: 300,
+	height: 200,
+	renderer: 'line',
+	series: new Rickshaw.Series.FixedDuration([{ name: 'mass' }], undefined, {
+		timeInterval: tv,
+		maxDataPoints: 100,
+		timeBase: new Date().getTime() / 1000
+	}) 
+} );
+var time = new Rickshaw.Fixtures.Time();
+var seconds = time.unit('second');
+
+var xAxis = new Rickshaw.Graph.Axis.Time({
+    graph: graph,
+    timeUnit: seconds
+});
+
+xAxis.render(); 
+var yAxis = new Rickshaw.Graph.Axis.Y({
+    graph: graph
+});
+
+yAxis.render();    
+
+//graph.render();
+
+// add some data every so often
+
+var i = 0;
+var iv = setInterval( function() {
+
+	var data = { 'mass': mfmData  };
+
+	graph.series.addData(data);
+	graph.render();
+
+}, tv );
+
+</script>
+    <script>
+function recSensorOff() {
+  document.getElementById("grbLED").className = "dot";
+  document.getElementById("demo").innerHTML = "Blank"  ;
+}
+function recSensorOn() {
+  document.getElementById("grbLED").className = "dot green";
+  document.getElementById("demo").innerHTML = "Green";
+}    
+    </script>     
+    
+   <script>
+function waterSensorOff() {
+  document.getElementById("wsLED").className = "dot";
+  document.getElementById("demo").innerHTML = "Blank"  ;
+}
+function waterSensorOn() {
+  document.getElementById("wsLED").className = "dot green";
+  document.getElementById("demo").innerHTML = "Green";
+}    
+    </script>   
+  
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="siclientv2.js"></script>
+  <!-- Then you can call it -->
+  <script type="text/javascript">
+    externalJS();
+  </script>
+    
+</body>
+
+°</html>
