@@ -200,13 +200,14 @@ rs.onclick = function() {
                
          case "GRBtemp":     
             GRBtemperature = data.value;
-            g2.refresh(GRBtemperature);   
+            g2.refresh(GRBtemperature); 
+            debugDiv.innerHTML ='GRB Temp' + GRBtemperature;    
             break;
                 
           case "SATtemp":     
             SATtemperature = data.value;
             g3.refresh(SATtemperature); 
-            debugDiv.innerHTML ='SAT Temp' + SATtemperature;   
+            //debugDiv.innerHTML ='SAT Temp' + SATtemperature;   
             break; 
                 
           case "GAStemp":     

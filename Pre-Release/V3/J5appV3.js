@@ -37,15 +37,15 @@ let tempPin = 4;// Dallas temperature sensor on GRB
 let gaPin =5;// Ga inject
 let rpPin = 6;// recovery motor
 let GRBheat = 7;//  relay control for GRB heater 
-let Satheat = 8;// relay control for Saturation Heater
+let SATheat = 8;// relay control for Saturation Heater
 let inPin = 9;// water IN
 let outPin = 10;// water OUT
 let rsPin = 11; // solenoid
 //let ?? = 12;// 
 
 // Analog Pins
-let Sat_Temp = 'A1'; // Stauration beaker temp
-
+let Sat_Temp = 'A1'; // Saturation beaker temp
+let Alt_Temp ='A0'; //TMP36 sensor
 
 
 let offState = true;// state of ws sensor 
@@ -116,14 +116,18 @@ board.on("ready", function() {
   var GRBthermometer = new five.Thermometer({
     controller: "DS18B20",
     pin: tempPin,
-    freq: 5000  // read temp every five seconds   
+    freq: 2000  // read temp every five seconds   
   }); 
   var SATthermometer = new five.Thermometer({
     controller: "LM335",
-    pin: Sat_Temp, //"A0"
+    pin: Sat_Temp, //"A1"
     freq: 5000  // read temp every five seconds 
   });  
-    
+    var ALTthermometer = new five.Thermometer({
+    controller: "TMP36",
+    pin: Alt_Temp, //"A0"
+    freq: 2000  // read temp every five seconds 
+  });   
     
  // water IN pump
 if(GRBoff){
@@ -185,8 +189,8 @@ if(GRBoff){
   });// end GA recovery pump
     
  GRBthermometer.on("change", function() { // Dallas sensor reporting GRB temp
-    Gtemp = this.celsius;
-     console.log(Gtemp + "°C");
+    var Gtemp = this.celsius;
+     console.log('GRB: ' + Gtemp + "°C");
     
     sData = {
        sensor: "GRBtemp",
@@ -200,8 +204,9 @@ if(GRBoff){
   });  
     
   SATthermometer.on("change", function() { // Dallas sensor reporting GRB temp
-    Stemp = this.celsius;
-      console.log(Stemp + "°C");
+    var Stemp = this.celsius;
+      if(Stemp < 0){Stemp =0;};
+      console.log('Sat: ' + Stemp + "°C");
     // console.log("0x" + this.address.toString(16));
     sData = {
        sensor: "SATtemp",
@@ -209,12 +214,26 @@ if(GRBoff){
             };
    io.emit('sensor', sData);
       // Turn off Saturation heater if temp over 125 C
-   if(Stemp > 125){
+   if(Stemp > 70){
        SATheater.low();
        }else{SATheater.high();} 
   });    
     
-
+  ALTthermometer.on("change", function() { // TMP36 Sensor
+    var Atemp = this.celsius;
+      if(Atemp < 0){Atemp =0;};
+      console.log('Alt: ' + Atemp + "°C");
+    // console.log("0x" + this.address.toString(16));
+    sData = {
+       sensor: "SATtemp",
+       value: Atemp
+            };
+   io.emit('sensor', sData);
+      // Turn off Saturation heater if temp over 125 C
+   if(Atemp > 70){
+       ALTheater.low();
+       }else{SATheater.high();} 
+  });
     
 
     

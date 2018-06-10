@@ -48,7 +48,7 @@
     </style>
     
     <!-- load scripts  -->
- <script type='text/javascript' > // load global vaiables
+ <script type='text/javascript' > // load global variables
   var SATtemperature = 31;
   var GRBtemperature = 31;   
   var GAStemperature = 31;   
@@ -256,22 +256,22 @@ var g3 = new JustGage({  // Saturation beaker temperature sensor
         id: 'g3',
         value: 125,
         min: 0,
-        max: 150,
+        max: 125,
         symbol: '°',
         pointer: true,
         gaugeWidthScale: 0.6,
         customSectors: [{
           color: '#ff0000',
-          lo: 135,
+          lo: 75,
           hi: 150
         }, {
           color: '#00ff00',
-          lo: 110,
-          hi: 135
+          lo: 65,
+          hi: 75
         },{
           color: '#0000ff',
           lo: 0,
-          hi: 110
+          hi: 65
         }],
         counter: true
       });
