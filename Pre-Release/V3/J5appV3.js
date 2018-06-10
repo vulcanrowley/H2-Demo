@@ -119,15 +119,11 @@ board.on("ready", function() {
     freq: 2000  // read temp every five seconds   
   }); 
   var SATthermometer = new five.Thermometer({
-    controller: "LM335",
-    pin: Sat_Temp, //"A1"
-    freq: 5000  // read temp every five seconds 
-  });  
-    var ALTthermometer = new five.Thermometer({
     controller: "TMP36",
-    pin: Alt_Temp, //"A0"
-    freq: 2000  // read temp every five seconds 
-  });   
+    pin: Sat_Temp, //"A1"
+    freq: 3000  // read temp every five seconds 
+  });  
+  
     
  // water IN pump
 if(GRBoff){
@@ -219,23 +215,6 @@ if(GRBoff){
        }else{SATheater.high();} 
   });    
     
-  ALTthermometer.on("change", function() { // TMP36 Sensor
-    var Atemp = this.celsius;
-      if(Atemp < 0){Atemp =0;};
-      console.log('Alt: ' + Atemp + "°C");
-    // console.log("0x" + this.address.toString(16));
-    sData = {
-       sensor: "SATtemp",
-       value: Atemp
-            };
-   io.emit('sensor', sData);
-      // Turn off Saturation heater if temp over 125 C
-   if(Atemp > 70){
-       ALTheater.low();
-       }else{SATheater.high();} 
-  });
-    
-
     
   // Listen to the web socket connection
   io.on('connection', function(client) {
