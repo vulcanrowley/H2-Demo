@@ -31,7 +31,7 @@ let sData ={};
 // Sensor inputs
 let wsPin = 2;
 let sssrPin = 3;
-let tempPin = 4;// Dallas temperature sensor on GRB
+let tempPin = 4;// Dallas temperature sensor on GRB NOT FUNCTION COLLIDES WITH DIGITAL IO
 
 // Actuator pins
 let gaPin =5;// Ga inject
@@ -45,7 +45,7 @@ let rsPin = 11; // solenoid
 
 // Analog Pins
 let Sat_Temp = 'A1'; // Saturation beaker temp
-let Alt_Temp ='A0'; //TMP36 sensor
+let GRB_Temp ='A0'; //TMP36 sensor
 
 
 let offState = true;// state of ws sensor 
@@ -76,7 +76,7 @@ app.get('/', function(req, res, next) {
   res.sendFile(__dirname + '/demoIndexV3.html')
 });
 
-//board = new five.Board();
+// USING FirmataPlus -- NOTE configFirmate has issues w Digital IO
 var board = new five.Board({
   //port: "COM9", // WARNING __ MUST SET ARDUINO PORT MANUALLY WHEN USING USB SERIAL
   //port: "/dev/ttyUSB0",
@@ -113,13 +113,13 @@ board.on("ready", function() {
   var sssr = new five.Button(sssrPin); 
     
 //Sensors
- /*   
+    
   var GRBthermometer = new five.Thermometer({
-    controller: "DS18B20",
-    pin: tempPin,
-    freq: 2000  // read temp every five seconds   
+    controller: "TMP36",
+    pin: GRB_Temp, //"A0"
+    freq: 3000  // read temp every five seconds   
   }); 
-  */
+  
   var SATthermometer = new five.Thermometer({
     controller: "TMP36",
     pin: Sat_Temp, //"A1"
@@ -185,8 +185,14 @@ if(GRBoff){
       };
      
   });// end GA recovery pump
-   /* 
- GRBthermometer.on("change", function() { // Dallas sensor reporting GRB temp
+    
+ // Heater controls
+    
+    // Initialize heaters
+ GRBheater.high(); 
+ SATheater.high(); 
+    
+ GRBthermometer.on("change", function() { // TMP36 sensor reporting GRB temp
     var Gtemp = this.celsius;
      console.log('GRB: ' + Gtemp + "°C");
     
@@ -200,8 +206,8 @@ if(GRBoff){
        GRBheater.low();
        }else{GRBheater.high();} 
   });  
-    */
-  SATthermometer.on("change", function() { // Dallas sensor reporting GRB temp
+    
+  SATthermometer.on("change", function() { // TMP36 sensor reporting SAT temp
     var Stemp = this.celsius;
       if(Stemp < 0){Stemp =0;};
       console.log('Sat: ' + Stemp + "°C");
