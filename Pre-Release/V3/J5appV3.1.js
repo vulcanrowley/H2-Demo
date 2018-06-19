@@ -45,7 +45,7 @@ let rsPin = 11; // solenoid
 
 // Analog Pins
 let Sat_Temp = 'A1'; // Saturation beaker temp
-let GRB_Temp ='A0'; //TMP36 sensor
+let GRB_Temp ='A0'; //  GRB TMP36 sensor
 
 
 let offState = true;// state of ws sensor 
